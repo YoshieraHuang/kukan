@@ -6,7 +6,7 @@ pub trait ClosestValue<T>: Contain<T>
 where
     T: PartialOrd,
 {
-    /// Return the closest value within the range to the given value
+    /// Return the closest value within the interval to the given value
     fn closest(&self, t: T) -> Option<T>
     where
         T: Copy,
@@ -27,8 +27,8 @@ where
     }
 }
 
-impl<T, Range> ClosestValue<T> for Range
+impl<T, Interval> ClosestValue<T> for Interval
 where
-    Range: Contain<T>,
+    Interval: Contain<T>,
     T: PartialOrd + Copy
 {}

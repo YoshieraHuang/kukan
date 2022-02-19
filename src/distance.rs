@@ -54,9 +54,9 @@ where
     }
 }
 
-impl<T, Range> IntervalSize<T> for Range
+impl<T, Interval> IntervalSize<T> for Interval
 where
-    Range: Contain<T>,
+    Interval: Contain<T>,
     T: Copy + PartialOrd + Zero + Distance,
     T::Scalar: Zero,
 {
