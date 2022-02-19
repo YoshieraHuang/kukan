@@ -2,6 +2,12 @@
 name = "kukan"
 version = "0.1.0"
 edition = "2021"
+description = "kukan is a simple and powerful tool for mathematical interval"
+authors = [ "Yoshiera <yoshierahuang@126.com>" ]
+readme = "README.md"
+repository = "https://github.com/YoshieraHuang/kukan"
+keywords = ["kukan", "interval"]
+categories = ["math"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
