@@ -6,6 +6,7 @@ mod closest;
 pub use contain::{Contain, Relative};
 pub use distance::{Distance, IntervalSize};
 pub use cut::{AboveExclusive, AboveInclusive, BelowExclusive, BelowInclusive};
+pub use closest::ClosestValue;
 pub use std::ops::Bound;
 pub use std::ops::Bound::*;
 
