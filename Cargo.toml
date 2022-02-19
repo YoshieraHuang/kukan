@@ -1,6 +1,6 @@
 [package]
 name = "kukan"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "kukan is a simple and powerful tool for mathematical interval"
 authors = [ "Yoshiera <yoshierahuang@126.com>" ]
