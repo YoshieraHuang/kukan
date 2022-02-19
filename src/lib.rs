@@ -4,54 +4,54 @@ mod cut;
 mod closest;
 
 pub use contain::{Contain, Relative};
-pub use distance::{Distance, RangeSize};
+pub use distance::{Distance, IntervalSize};
 pub use cut::{AboveExclusive, AboveInclusive, BelowExclusive, BelowInclusive};
 pub use std::ops::Bound;
 pub use std::ops::Bound::*;
 
-/// An unbounded range
+/// An unbounded interval
 pub struct Full;
 
-/// A range only bounded exclusively below (start,)
-pub struct StartExclusive<A> {
-    pub start: A,
+/// A left-bounded open interval (left,)
+pub struct LeftOpen<A> {
+    pub left: A,
 }
 
-/// A range only bounded inclusively below [start,)
-pub struct StartInclusive<A> {
-    pub start: A,
+/// A left-bounded closed interval [left,)
+pub struct LeftClosed<A> {
+    pub left: A,
 }
 
-/// A range only boudned exclusively beyond (,end)
-pub struct EndExclusive<A> {
-    pub end: A,
+/// A right-bounded open interval (,right)
+pub struct RightOpen<A> {
+    pub right: A,
 }
 
-/// A range only bounded inclusively beyond (,end]
-pub struct EndInclusive<A> {
-    pub end: A,
+/// A right-bounded closed interval (,right]
+pub struct RightClosed<A> {
+    pub right: A,
 }
 
-/// A range bounded inclusively below and inclusively above [start, end]
-pub struct StartInclusiveEndInclusive<A> {
-    pub start: A,
-    pub end: A,
+/// An interval with left closed and right closed [left, right]
+pub struct LeftClosedRightClosed<A> {
+    pub left: A,
+    pub right: A,
 }
 
-/// A range bounded exclusively below and inclusively above (start, end]
-pub struct StartExclusiveEndInclusive<A> {
-    pub start: A,
-    pub end: A,
+/// An interval with left open and right closed (left, right]
+pub struct LeftOpenRightClosed<A> {
+    pub left: A,
+    pub right: A,
 }
 
-/// A range bounded inclusively below and exclusively above [start, end]
-pub struct StartInclusiveEndExclusive<A> {
-    pub start: A,
-    pub end: A,
+/// An interval with left closed and right open [left, right)
+pub struct LeftClosedRightOpen<A> {
+    pub left: A,
+    pub right: A,
 }
 
-/// A range bounded exclusively below and exclusively above (start, end]
-pub struct StartExclusiveEndExclusive<A> {
-    pub start: A,
-    pub end: A,
+/// An interval with left open and right open (left, right)
+pub struct LeftOpenRightOpen<A> {
+    pub left: A,
+    pub right: A,
 }

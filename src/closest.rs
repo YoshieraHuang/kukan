@@ -13,13 +13,13 @@ where
     {
         self.relative(&t).and_then(|rel| match rel {
             Relative::In => Some(t),
-            Relative::Below => match self.start_bound() {
-                Included(start) => Some(*start),
+            Relative::Below => match self.left_bound() {
+                Included(left) => Some(*left),
                 Excluded(_) => None,
                 Unbounded => unreachable!(),
             },
-            Relative::Above => match self.end_bound() {
-                Included(end) => Some(*end),
+            Relative::Above => match self.right_bound() {
+                Included(right) => Some(*right),
                 Excluded(_) => None,
                 Unbounded => unreachable!(),
             },

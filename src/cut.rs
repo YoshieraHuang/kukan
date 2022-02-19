@@ -1,226 +1,226 @@
 use crate::contain::Contain;
-use crate::{Full, StartExclusive, StartInclusive, EndExclusive, EndInclusive, StartInclusiveEndInclusive, StartExclusiveEndInclusive, StartInclusiveEndExclusive, StartExclusiveEndExclusive};
+use crate::{Full, LeftOpen, LeftClosed, RightOpen, RightClosed, LeftClosedRightClosed, LeftOpenRightClosed, LeftClosedRightOpen, LeftOpenRightOpen};
 
-/// Cut the range and give the below inclusive range.
+/// Cut the interval and give the below inclusive interval.
 pub trait BelowInclusive<T: PartialOrd> {
-    /// Below range
-    type Range: Contain<T>;
+    /// Below interval
+    type Interval: Contain<T>;
 
-    /// Inclusive below range
-    fn below_inclusive(self, edge: T) -> Self::Range;
+    /// Inclusive below interval
+    fn below_inclusive(self, edge: T) -> Self::Interval;
 }
 
-/// Cut the range and give the below exclusive range.
+/// Cut the interval and give the below exclusive interval.
 pub trait BelowExclusive<T: PartialOrd> {
-    /// Below range
-    type Range: Contain<T>;
+    /// Below interval
+    type Interval: Contain<T>;
 
-    /// Inclusive below range
-    fn below_exclusive(self, edge: T) -> Self::Range;
+    /// Inclusive below interval
+    fn below_exclusive(self, edge: T) -> Self::Interval;
 }
 
-/// Cut the range and give the above inclusive range.
+/// Cut the interval and give the above inclusive interval.
 pub trait AboveInclusive<T: PartialOrd> {
-    /// Above range
-    type Range: Contain<T>;
+    /// Above interval
+    type Interval: Contain<T>;
 
-    /// Above inclusive range
-    fn above_inclusive(self, edge: T) -> Self::Range;
+    /// Above inclusive interval
+    fn above_inclusive(self, edge: T) -> Self::Interval;
 }
 
-/// Cut the range and give the above exclusive range.
+/// Cut the interval and give the above exclusive interval.
 pub trait AboveExclusive<T: PartialOrd> {
-    /// Above range
-    type Range: Contain<T>;
+    /// Above interval
+    type Interval: Contain<T>;
 
-    /// Above exclusive range
-    fn above_exclusive(self, edge: T) -> Self::Range;
+    /// Above exclusive interval
+    fn above_exclusive(self, edge: T) -> Self::Interval;
 }
 
 impl<T: PartialOrd> BelowInclusive<T> for Full {
-    type Range = EndInclusive<T>;
+    type Interval = RightClosed<T>;
 
-    fn below_inclusive(self, edge: T) -> Self::Range {
-        Self::Range { end: edge }
+    fn below_inclusive(self, edge: T) -> Self::Interval {
+        Self::Interval { right: edge }
     }
 }
 
 impl<T: PartialOrd> AboveExclusive<T> for Full {
-    type Range = StartExclusive<T>;
+    type Interval = LeftOpen<T>;
 
-    fn above_exclusive(self, edge: T) -> Self::Range {
-        Self::Range { start: edge }
+    fn above_exclusive(self, edge: T) -> Self::Interval {
+        Self::Interval { left: edge }
     }
 }
 
 impl<T: PartialOrd> BelowExclusive<T> for Full {
-    type Range = EndExclusive<T>;
+    type Interval = RightOpen<T>;
 
-    fn below_exclusive(self, edge: T) -> Self::Range {
-        Self::Range { end: edge }
+    fn below_exclusive(self, edge: T) -> Self::Interval {
+        Self::Interval { right: edge }
     }
 }
 
 impl<T: PartialOrd> AboveInclusive<T> for Full {
-    type Range = StartInclusive<T>;
+    type Interval = LeftClosed<T>;
 
-    fn above_inclusive(self, edge: T) -> Self::Range {
-        Self::Range { start: edge }
+    fn above_inclusive(self, edge: T) -> Self::Interval {
+        Self::Interval { left: edge }
     }
 }
 
-macro_rules! impl_cut_for_end {
-    ($range: ident -> below: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+macro_rules! impl_cut_for_right {
+    ($interval: ident -> below: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    end: std::cmp::min(edge, self.end)
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    right: std::cmp::min(edge, self.right)
                 }
             }
         }
     };
-    ($range: ident -> beyond: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+    ($interval: ident -> beyond: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    start: edge,
-                    end: self.end
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    left: edge,
+                    right: self.right
                 }
             }
         }
     };
-    ($range: ident, $below_in_range: ident, $below_ex_range: ident, $beyond_in_range: ident, $beyond_ex_range: ident) => {
-        impl_cut_for_end!($range -> below: BelowInclusive, below_inclusive, $below_in_range);
-        impl_cut_for_end!($range -> below: BelowExclusive, below_exclusive, $below_ex_range);
-        impl_cut_for_end!($range -> beyond: AboveInclusive, above_inclusive, $beyond_in_range);
-        impl_cut_for_end!($range -> beyond: AboveExclusive, above_exclusive, $beyond_ex_range);
+    ($interval: ident, $below_in_interval: ident, $below_ex_interval: ident, $beyond_in_interval: ident, $beyond_ex_interval: ident) => {
+        impl_cut_for_right!($interval -> below: BelowInclusive, below_inclusive, $below_in_interval);
+        impl_cut_for_right!($interval -> below: BelowExclusive, below_exclusive, $below_ex_interval);
+        impl_cut_for_right!($interval -> beyond: AboveInclusive, above_inclusive, $beyond_in_interval);
+        impl_cut_for_right!($interval -> beyond: AboveExclusive, above_exclusive, $beyond_ex_interval);
     }
 }
 
-impl_cut_for_end!(
-    EndExclusive,
-    EndInclusive,
-    EndExclusive,
-    StartInclusiveEndExclusive,
-    StartExclusiveEndExclusive
+impl_cut_for_right!(
+    RightOpen,
+    RightClosed,
+    RightOpen,
+    LeftClosedRightOpen,
+    LeftOpenRightOpen
 );
-impl_cut_for_end!(
-    EndInclusive,
-    EndInclusive,
-    EndExclusive,
-    StartInclusiveEndInclusive,
-    StartExclusiveEndInclusive
+impl_cut_for_right!(
+    RightClosed,
+    RightClosed,
+    RightOpen,
+    LeftClosedRightClosed,
+    LeftOpenRightClosed
 );
 
-macro_rules! impl_cut_for_start {
-    ($range: ident -> below: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+macro_rules! impl_cut_for_left {
+    ($interval: ident -> below: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    start: self.start,
-                    end: edge,
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    left: self.left,
+                    right: edge,
                 }
             }
         }
     };
-    ($range: ident -> beyond: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+    ($interval: ident -> beyond: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    start: std::cmp::max(self.start, edge)
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    left: std::cmp::max(self.left, edge)
                 }
             }
         }
     };
-    ($range: ident, $below_in_range: ident, $below_ex_range: ident, $beyond_in_range: ident, $beyond_ex_range: ident) => {
-        impl_cut_for_start!($range -> below: BelowInclusive, below_inclusive, $below_in_range);
-        impl_cut_for_start!($range -> below: BelowExclusive, below_exclusive, $below_ex_range);
-        impl_cut_for_start!($range -> beyond: AboveInclusive, above_inclusive, $beyond_in_range);
-        impl_cut_for_start!($range -> beyond: AboveExclusive, above_exclusive, $beyond_ex_range);
+    ($interval: ident, $below_in_interval: ident, $below_ex_interval: ident, $beyond_in_interval: ident, $beyond_ex_interval: ident) => {
+        impl_cut_for_left!($interval -> below: BelowInclusive, below_inclusive, $below_in_interval);
+        impl_cut_for_left!($interval -> below: BelowExclusive, below_exclusive, $below_ex_interval);
+        impl_cut_for_left!($interval -> beyond: AboveInclusive, above_inclusive, $beyond_in_interval);
+        impl_cut_for_left!($interval -> beyond: AboveExclusive, above_exclusive, $beyond_ex_interval);
     }
 }
 
-impl_cut_for_start!(
-    StartExclusive,
-    StartExclusiveEndInclusive,
-    StartExclusiveEndExclusive,
-    StartInclusive,
-    StartExclusive
+impl_cut_for_left!(
+    LeftOpen,
+    LeftOpenRightClosed,
+    LeftOpenRightOpen,
+    LeftClosed,
+    LeftOpen
 );
-impl_cut_for_start!(
-    StartInclusive,
-    StartInclusiveEndInclusive,
-    StartInclusiveEndExclusive,
-    StartInclusive,
-    StartExclusive
+impl_cut_for_left!(
+    LeftClosed,
+    LeftClosedRightClosed,
+    LeftClosedRightOpen,
+    LeftClosed,
+    LeftOpen
 );
 
-macro_rules! impl_cut_for_two_end {
-    ($range: ident -> below: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+macro_rules! impl_cut_for_two_right {
+    ($interval: ident -> below: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    start: self.start,
-                    end: std::cmp::min(edge, self.end),
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    left: self.left,
+                    right: std::cmp::min(edge, self.right),
                 }
             }
         }
     };
-    ($range: ident -> beyond: $trait: ident, $fn: ident, $range_ty: ident) => {
-        impl<T: Ord> $trait<T> for $range<T> {
-            type Range = $range_ty<T>;
+    ($interval: ident -> beyond: $trait: ident, $fn: ident, $interval_ty: ident) => {
+        impl<T: Ord> $trait<T> for $interval<T> {
+            type Interval = $interval_ty<T>;
 
-            fn $fn(self, edge: T) -> Self::Range {
-                Self::Range {
-                    start: std::cmp::max(self.start, edge),
-                    end: self.end,
+            fn $fn(self, edge: T) -> Self::Interval {
+                Self::Interval {
+                    left: std::cmp::max(self.left, edge),
+                    right: self.right,
                 }
             }
         }
     };
-    ($range: ident, $below_in_range: ident, $below_ex_range: ident, $beyond_in_range: ident, $beyond_ex_range: ident) => {
-        impl_cut_for_two_end!($range -> below: BelowInclusive, below_inclusive, $below_in_range);
-        impl_cut_for_two_end!($range -> below: BelowExclusive, below_exclusive, $below_ex_range);
-        impl_cut_for_two_end!($range -> beyond: AboveInclusive, above_inclusive, $beyond_in_range);
-        impl_cut_for_two_end!($range -> beyond: AboveExclusive, above_exclusive, $beyond_ex_range);
+    ($interval: ident, $below_in_interval: ident, $below_ex_interval: ident, $beyond_in_interval: ident, $beyond_ex_interval: ident) => {
+        impl_cut_for_two_right!($interval -> below: BelowInclusive, below_inclusive, $below_in_interval);
+        impl_cut_for_two_right!($interval -> below: BelowExclusive, below_exclusive, $below_ex_interval);
+        impl_cut_for_two_right!($interval -> beyond: AboveInclusive, above_inclusive, $beyond_in_interval);
+        impl_cut_for_two_right!($interval -> beyond: AboveExclusive, above_exclusive, $beyond_ex_interval);
     }
 }
 
-impl_cut_for_two_end!(
-    StartInclusiveEndInclusive,
-    StartInclusiveEndInclusive,
-    StartInclusiveEndExclusive,
-    StartInclusiveEndInclusive,
-    StartExclusiveEndInclusive
+impl_cut_for_two_right!(
+    LeftClosedRightClosed,
+    LeftClosedRightClosed,
+    LeftClosedRightOpen,
+    LeftClosedRightClosed,
+    LeftOpenRightClosed
 );
-impl_cut_for_two_end!(
-    StartExclusiveEndInclusive,
-    StartExclusiveEndInclusive,
-    StartExclusiveEndExclusive,
-    StartInclusiveEndInclusive,
-    StartExclusiveEndInclusive
+impl_cut_for_two_right!(
+    LeftOpenRightClosed,
+    LeftOpenRightClosed,
+    LeftOpenRightOpen,
+    LeftClosedRightClosed,
+    LeftOpenRightClosed
 );
-impl_cut_for_two_end!(
-    StartInclusiveEndExclusive,
-    StartInclusiveEndInclusive,
-    StartInclusiveEndExclusive,
-    StartInclusiveEndExclusive,
-    StartExclusiveEndExclusive
+impl_cut_for_two_right!(
+    LeftClosedRightOpen,
+    LeftClosedRightClosed,
+    LeftClosedRightOpen,
+    LeftClosedRightOpen,
+    LeftOpenRightOpen
 );
-impl_cut_for_two_end!(
-    StartExclusiveEndExclusive,
-    StartExclusiveEndInclusive,
-    StartExclusiveEndExclusive,
-    StartInclusiveEndExclusive,
-    StartExclusiveEndExclusive
+impl_cut_for_two_right!(
+    LeftOpenRightOpen,
+    LeftOpenRightClosed,
+    LeftOpenRightOpen,
+    LeftClosedRightOpen,
+    LeftOpenRightOpen
 );

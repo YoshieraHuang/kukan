@@ -28,13 +28,13 @@ impl Distance for f64
     }
 }
 
-/// Range Size
-pub trait RangeSize<T>: Contain<T>
+/// Interval size
+pub trait IntervalSize<T>: Contain<T>
 where
     T: PartialOrd,
 {
-    /// Range Size
-    fn range_size(&self) -> Option<T::Scalar>
+    /// Interval size
+    fn size(&self) -> Option<T::Scalar>
     where
         T: Copy + Zero + Distance,
         T::Scalar: Zero,
@@ -43,18 +43,18 @@ where
             return Some(T::Scalar::zero());
         }
 
-        match (self.start_bound(), self.end_bound()) {
+        match (self.left_bound(), self.right_bound()) {
             (Unbounded, _) => None,
             (_, Unbounded) => None,
-            (Included(start), Included(end)) => Some(end.distance(*start)),
-            (Excluded(start), Included(end)) => Some(end.distance(*start)),
-            (Included(start), Excluded(end)) => Some(end.distance(*start)),
-            (Excluded(start), Excluded(end)) => Some(end.distance(*start)),
+            (Included(left), Included(right)) => Some(right.distance(*left)),
+            (Excluded(left), Included(right)) => Some(right.distance(*left)),
+            (Included(left), Excluded(right)) => Some(right.distance(*left)),
+            (Excluded(left), Excluded(right)) => Some(right.distance(*left)),
         }
     }
 }
 
-impl<T, Range> RangeSize<T> for Range
+impl<T, Range> IntervalSize<T> for Range
 where
     Range: Contain<T>,
     T: Copy + PartialOrd + Zero + Distance,

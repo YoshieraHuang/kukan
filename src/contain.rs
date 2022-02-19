@@ -1,27 +1,27 @@
 use std::ops::Bound;
 use std::ops::Bound::*;
 
-use crate::{Full, StartExclusive, StartInclusive, EndExclusive, EndInclusive, StartInclusiveEndInclusive, StartExclusiveEndInclusive, StartInclusiveEndExclusive, StartExclusiveEndExclusive};
+use crate::{Full, LeftOpen, LeftClosed, RightOpen, RightClosed, LeftClosedRightClosed, LeftOpenRightClosed, LeftClosedRightOpen, LeftOpenRightOpen};
 
 pub trait Contain<T: ?Sized + PartialOrd> {
-    /// start bound
-    fn start_bound(&self) -> Bound<&T>;
+    /// left bound
+    fn left_bound(&self) -> Bound<&T>;
 
-    /// end bound
-    fn end_bound(&self) -> Bound<&T>;
+    /// right bound
+    fn right_bound(&self) -> Bound<&T>;
 
-    /// Whether this range is null.
+    /// Whether this interval is null.
     fn is_null(&self) -> bool {
-        match (self.start_bound(), self.end_bound()) {
-            // Either bound is unbound, the range is not null
+        match (self.left_bound(), self.right_bound()) {
+            // Either bound is unbound, the interval is not null
             (Unbounded, _) => false,
             (_, Unbounded) => false,
             // Both included
-            (Included(start), Included(end)) => start > end,
+            (Included(left), Included(right)) => left > right,
             // Either bound is excluded
-            (Excluded(start), Excluded(end)) => start >= end,
-            (Included(start), Excluded(end)) => start >= end,
-            (Excluded(start), Included(end)) => start >= end,
+            (Excluded(left), Excluded(right)) => left >= right,
+            (Included(left), Excluded(right)) => left >= right,
+            (Excluded(left), Included(right)) => left >= right,
         }
     }
 
@@ -35,17 +35,17 @@ pub trait Contain<T: ?Sized + PartialOrd> {
             return None;
         }
 
-        let res = match (self.start_bound(), self.end_bound()) {
-            (Included(start), _) if item < start => Relative::Below,
-            (Excluded(start), _) if item <= start => Relative::Below,
-            (_, Included(end)) if item > end => Relative::Above,
-            (_, Excluded(end)) if item >= end => Relative::Above,
+        let res = match (self.left_bound(), self.right_bound()) {
+            (Included(left), _) if item < left => Relative::Below,
+            (Excluded(left), _) if item <= left => Relative::Below,
+            (_, Included(right)) if item > right => Relative::Above,
+            (_, Excluded(right)) if item >= right => Relative::Above,
             _ => Relative::In,
         };
         Some(res)
     }
 
-    /// Whether this range contains the item.
+    /// Whether this interval contains the item.
     fn contains<U>(&self, item: &U) -> bool
     where
         T: PartialOrd<U>,
@@ -57,11 +57,11 @@ pub trait Contain<T: ?Sized + PartialOrd> {
 
 /// Relative position
 pub enum Relative {
-    /// Below the range
+    /// Below the interval
     Below,
-    /// In the range
+    /// In the interval
     In,
-    /// Above the range
+    /// Above the interval
     Above,
 }
 
@@ -80,91 +80,91 @@ impl Relative {
 }
 
 impl<T: PartialOrd + ?Sized> Contain<T> for Full {
-    fn start_bound(&self) -> Bound<&T> {
+    fn left_bound(&self) -> Bound<&T> {
         Unbounded
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Unbounded
-    }
-}
-
-impl<T: PartialOrd> Contain<T> for StartExclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Excluded(&self.start)
-    }
-
-    fn end_bound(&self) -> Bound<&T> {
+    fn right_bound(&self) -> Bound<&T> {
         Unbounded
     }
 }
 
-impl<T: PartialOrd> Contain<T> for StartInclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Included(&self.start)
+impl<T: PartialOrd> Contain<T> for LeftOpen<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Excluded(&self.left)
     }
 
-    fn end_bound(&self) -> Bound<&T> {
+    fn right_bound(&self) -> Bound<&T> {
         Unbounded
     }
 }
 
-impl<T: PartialOrd> Contain<T> for EndExclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
+impl<T: PartialOrd> Contain<T> for LeftClosed<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Included(&self.left)
+    }
+
+    fn right_bound(&self) -> Bound<&T> {
+        Unbounded
+    }
+}
+
+impl<T: PartialOrd> Contain<T> for RightOpen<T> {
+    fn left_bound(&self) -> Bound<&T> {
         Unbounded
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Excluded(&self.end)
+    fn right_bound(&self) -> Bound<&T> {
+        Excluded(&self.right)
     }
 }
 
-impl<T: PartialOrd> Contain<T> for EndInclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
+impl<T: PartialOrd> Contain<T> for RightClosed<T> {
+    fn left_bound(&self) -> Bound<&T> {
         Unbounded
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Included(&self.end)
+    fn right_bound(&self) -> Bound<&T> {
+        Included(&self.right)
     }
 }
 
-impl<T: PartialOrd> Contain<T> for StartInclusiveEndInclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Included(&self.start)
+impl<T: PartialOrd> Contain<T> for LeftClosedRightClosed<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Included(&self.left)
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Included(&self.end)
-    }
-}
-
-impl<T: PartialOrd> Contain<T> for StartExclusiveEndInclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Excluded(&self.start)
-    }
-
-    fn end_bound(&self) -> Bound<&T> {
-        Included(&self.end)
+    fn right_bound(&self) -> Bound<&T> {
+        Included(&self.right)
     }
 }
 
-impl<T: PartialOrd> Contain<T> for StartInclusiveEndExclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Included(&self.start)
+impl<T: PartialOrd> Contain<T> for LeftOpenRightClosed<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Excluded(&self.left)
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Excluded(&self.end)
+    fn right_bound(&self) -> Bound<&T> {
+        Included(&self.right)
     }
 }
 
-impl<T: PartialOrd> Contain<T> for StartExclusiveEndExclusive<T> {
-    fn start_bound(&self) -> Bound<&T> {
-        Excluded(&self.start)
+impl<T: PartialOrd> Contain<T> for LeftClosedRightOpen<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Included(&self.left)
     }
 
-    fn end_bound(&self) -> Bound<&T> {
-        Excluded(&self.end)
+    fn right_bound(&self) -> Bound<&T> {
+        Excluded(&self.right)
+    }
+}
+
+impl<T: PartialOrd> Contain<T> for LeftOpenRightOpen<T> {
+    fn left_bound(&self) -> Bound<&T> {
+        Excluded(&self.left)
+    }
+
+    fn right_bound(&self) -> Bound<&T> {
+        Excluded(&self.right)
     }
 }
