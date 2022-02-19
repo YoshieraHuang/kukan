@@ -9,6 +9,7 @@ license = "MIT"
 repository = "https://github.com/YoshieraHuang/kukan"
 keywords = ["kukan", "interval"]
 categories = ["mathematics"]
+documentation = "https://docs.rs/kukan/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
